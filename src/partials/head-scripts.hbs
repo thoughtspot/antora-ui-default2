@@ -1,0 +1,144 @@
+    {{#if (eq env.FORCE_HTTPS 'true')}}
+  <script>(function(l,p){if(l.protocol!==p)l.protocol=p})(location,'https:')</script>
+{{/if}}
+<!-- {{#with site.keys.googleAnalytics}}
+    <script>function gtag(){dataLayer.push(arguments)};window.dataLayer=window.dataLayer||[];gtag('js',new Date());gtag('config','{{this}}')</script>
+    {{/with}}
+    {{#if env.OPTANON_SCRIPT_URL}} -->
+<!--      jquery is also loaded in the footer, don't load it twice.-->
+      <!-- <script src="{{uiRootPath}}/js/vendor/jquery.js"></script> -->
+      <script src="{{env.OPTANON_SCRIPT_URL}}"></script>
+      <script>function OptanonWrapper(){}</script>
+    {{/if}}
+    <!-- {{#if site.keys.googleAnalytics}}
+      <script>(window.dataLayer=window.dataLayer||[]).push({'gtm.start':+new Date(),event:'gtm.js'})</script>
+      <script async src="https://www.googletagmanager.com/gtm.js?id={{site.keys.googleAnalytics}}"></script>
+    {{/if}} -->
+    <script>var uiRootPath = '{{{uiRootPath}}}'</script>
+    <script src="https://unpkg.com/accordion-js@3.3.1/dist/accordion.min.js"></script>
+    <script src="https://thoughtspot.github.io/js/index.js"></script>
+    <!--<script src="https://thoughtspotscripts.ngrok.io/public/algolia/dist/algolia_search.bundled.js"></script>-->
+    <script src="https://scripts.thoughtspot.com/algolia_search.bundled.js"></script>
+    <script>
+    	function setCookie(name, value, days) {
+    		var expires = "";
+    		if (days) {
+    			var date = new Date();
+    			date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+    			expires = "; expires=" + date.toUTCString();
+    		}
+    		document.cookie = name + "=" + (value || "") + expires + "; path=/; SameSite=None; secure=true;";
+    	}
+    	function getCookie(name) {
+    		var nameEQ = name + "=";
+    		var ca = document.cookie.split(';');
+    		for (var i = 0; i < ca.length; i++) {
+    			var c = ca[i];
+    			while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+    			if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+    		}
+    		return null;
+    	}
+    	function eraseCookie(name, path='/') {
+    		if (getCookie(name)) {
+    			document.cookie = name + "=" +
+    				((path) ? "; path=" + path:"") +
+    				"; expires=Thu, 01 Jan 1970 00:00:01 GMT; SameSite=None; secure=true;";
+    		}
+    	}
+
+    	const currentPath = window.location.pathname;
+    	const splitPath = currentPath.split('/').filter(Boolean);
+    	const homePage = splitPath.length == 3 ? true : false;
+
+    	// console.log('cookie', getCookie('help_history'), homePage);
+
+    	if (getCookie('help_history') && homePage) {
+    		// console.log('useCookie', getCookie('help_history'));
+    		window.location = getCookie('help_history');
+    	} else if (!homePage) {
+    		setCookie('help_history', window.location.href, 1);
+    		// console.log('setCookie', window.location.href, getCookie('help_history'));
+    	} else if (homePage) {
+    		// console.log('eraseCookie');
+    		eraseCookie('help_history');
+    	}
+
+    	window.addEventListener('message', (event) => {
+    		// console.log('message', event)
+    		if (event.data == 'close') {
+    			eraseCookie('help_history')
+    		}
+    	});
+
+    	window.addEventListener('load', () => {
+    		if (document.querySelector('.home-link')) {
+    			document.querySelector('.home-link').addEventListener('click', (e) => {
+    				eraseCookie('help_history');
+    			})
+    		}
+    	})
+
+    	let initialized = false;
+    	async function initializeAlgolia() {
+    		if (initialized) return;
+    		initialized = true;
+
+    		const searchElement = document.querySelector('#algolia-search')
+    		searchElement.style.boxSizing = 'border-box'
+    		document.body.classList.add('algolia_docs')
+    		searchElement.classList.add('algolia_docs')
+    		searchElement.classList.add('algolia_docs_embed')
+
+    		const pathParams = window.location.pathname.split('/').filter(Boolean)
+
+    		let deployment = ['software', 'cloud'].indexOf(pathParams[1]) > -1 ? pathParams[1] : null
+    		let version = pathParams[2] ? pathParams[2] : null
+
+    		let filters = { docs: {} }
+
+    		if (deployment) {
+    			filters.docs.deployment = deployment
+    		}
+
+    		if (version) {
+    			filters.docs.version = version
+    		}
+
+    		// INLINE
+    		const algoliaSearch = await new window.AlgoliaSearchComponent(searchElement, {
+    			inline: true,
+    			filters: filters,
+    			addClass: 'header_algolia_search',
+    			firstResults: 'docs',
+    			placeholderText: 'Search documentation, community, and training',
+    			startFocused: homePage ? true : false,
+    			filters: filters,
+    			hideViewMore: true,
+    			docsIndexName: 'crawler_thoughtspot_help'
+    		});
+
+    	}
+
+    	function awaitAlgolia() {
+    		if (window.AlgoliaSearchComponent) {
+    			initializeAlgolia();
+    		} else {
+    			window.addEventListener('algoliaReady', initializeAlgolia);
+    		}
+    	}
+
+    	if (document.readyState === 'complete') {
+    		awaitAlgolia()
+    	} else {
+    		document.addEventListener("DOMContentLoaded", awaitAlgolia);
+    	}
+
+    </script>
+      <!--  <script>var vanillaModal = new VanillaModal.default()</script> -->
+      <!--  <script>const modal = new VanillaModal(options);</script> -->
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+            <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+              <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+              {{!-- <script src="https://cdn.sitesearch360.com/v13/sitesearch360-v13.min.js" async></script> --}}
+    <script src="https://thoughtspot.github.io/js/index.js"></script>
